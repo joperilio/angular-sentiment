@@ -1,59 +1,62 @@
-# AngularSentiment
+# Angular Sentiment Analysis App
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.12.
+A fullstack demo application that performs **sentiment analysis on text** using:
 
-## Development server
+- Angular frontend
+- FastAPI backend (HuggingFace Transformer model)
+- Dockerized deployment
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
+## Quick Start (Docker)
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 1. Backend (API)
 
 ```bash
-ng generate component component-name
-```
+docker build -t sentiment-transformer .
+docker run -d -p 8001:8000 --name sentiment-transformer sentiment-transformer
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Test API:
+curl http://localhost:8001/predict \
+-H "Content-Type: application/json" \
+-H "x-api-key: supersecretkey" \
+-d '{"text":"I love this project!"}'
 
-```bash
-ng generate --help
-```
 
-## Building
-
-To build the project run:
-
-```bash
+Frontend (Angular)
 ng build
-```
+docker build -t angular-sentiment .
+docker run -d -p 4200:80 --name angular-sentiment angular-sentiment
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open:
+http://localhost:4200
 
-## Running unit tests
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
 
-```bash
-ng test
-```
+Update Workflow
+Frontend updates
+ng build
+docker rm -f angular-sentiment
+docker build --no-cache -t angular-sentiment .
+docker run -d -p 4200:80 --name angular-sentiment angular-sentiment
 
-## Running end-to-end tests
+Backend updates
+docker rm -f sentiment-transformer
+docker build --no-cache -t sentiment-transformer .
+docker run -d -p 8001:8000 sentiment-transformer
 
-For end-to-end (e2e) testing, run:
 
-```bash
-ng e2e
-```
+Notes
+Backend runs on http://localhost:8001
+API requires header: x-api-key: supersecretkey
+CORS must be enabled in FastAPI
+Angular uses production build served via Nginx
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
-## Additional Resources
+Architecture
+Angular (4200)
+   ↓ HTTP
+FastAPI (8001)
+   ↓
+Transformer Model (HuggingFace)
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
