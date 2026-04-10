@@ -1,0 +1,26 @@
+<div style="max-width: 500px; margin: auto; padding: 2rem;">
+  <h2>Text Sentiment Analysis</h2>
+  <h2>🚀 NEW VERSION 🚀</h2>
+  <textarea 
+  [(ngModel)]="text" 
+  rows="5" 
+  placeholder="Enter: e.g. I love this product!"
+  style="
+    width: 100%;
+    max-width: 800px;
+    padding: 1rem;
+    background-color: #fff8dc;
+    color: #1a237e;
+    border: 1px solid #d6c28a;
+    border-radius: 8px;
+    font-size: 1rem;
+  "
+></textarea>
+  <br><br>
+  <button (click)="submit()">Analyze</button>
+
+  <div *ngIf="result" style="margin-top: 1rem; color: #444;">
+    <p><strong>Sentiment:</strong> {{ result }}</p>
+    <p><strong>Confidence:</strong> {{ confidence }}</p>
+  </div>
+</div>
