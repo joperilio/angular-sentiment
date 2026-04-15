@@ -15,7 +15,7 @@ export class AppComponent {
   result = '';
   confidence: number | null = null;
 
-  API_URL = 'http://localhost:8001/predict';
+  API_URL = 'http://bitshawk-technologies.net:8001/predict';
   API_KEY = 'supersecretkey';
 
   constructor(private http: HttpClient) {}

@@ -1,57 +1,90 @@
-# Angular Sentiment Analysis App
+Angular Sentiment App
 
-A fullstack demo application that performs **sentiment analysis on text** using:
+This project is an Angular frontend served via nginx inside a Docker container and communicates with a FastAPI backend for sentiment analysis.
 
-- Angular frontend
-- FastAPI backend (HuggingFace Transformer model)
-- Dockerized deployment
+Architecture Overview
 
----
+Development / Current Deployment:
 
-## Quick Start (Docker)
-
-### 1. Backend (API)
-
-```bash
-docker build -t sentiment-transformer .
-docker run -d -p 8001:8000 --name sentiment-transformer sentiment-transformer
-
-Test API:
-curl http://localhost:8001/predict \
--H "Content-Type: application/json" \
--H "x-api-key: supersecretkey" \
--d '{"text":"I love this project!"}'
-
+Browser
+→ HTTP
+→ VPS Apache (HTTPS on port 443, already in use)
+→ Angular Container (nginx on port 80)
+→ FastAPI Service (port 8001)
 
 Frontend (Angular)
-ng build
+
+The Angular application is built using a multi-stage Docker build:
+
+Build stage uses Node.js
+Runtime stage uses nginx to serve static files
+
+Container Port Mapping:
+Host port 4200 is mapped to container port 80
+
+Access URL in current setup:
+http://<host>:4200
+
+or
+http://<VPS-IP>:4200
+
+HTTPS / SSL Status
+
+SSL is currently handled by Apache on the VPS.
+Port 443 is already in use by Apache.
+The Angular container does not handle SSL directly.
+HTTPS is not provided by this container.
+
+This is intentional due to infrastructure constraints.
+
+Build & Run
+
+Build Docker image:
 docker build -t angular-sentiment .
-docker run -d -p 4200:80 --name angular-sentiment angular-sentiment
 
-Open:
-http://localhost:4200
+Run container:
+docker run -p 4200:80 angular-sentiment
 
+Backend (FastAPI)
 
+The backend is a separate service running on:
+http://<host>:8001
 
-Update Workflow
-Frontend updates
-ng build
-docker rm -f angular-sentiment
-docker build --no-cache -t angular-sentiment .
-docker run -d -p 4200:80 --name angular-sentiment angular-sentiment
+It provides a /predict endpoint for sentiment analysis.
 
-Backend updates
-docker rm -f sentiment-transformer
-docker build --no-cache -t sentiment-transformer .
-docker run -d -p 8001:8000 sentiment-transformer
+API Example:
+curl -X POST http://<host>:8001/predict -H "Content-Type: application/json" -H "x-api-key: supersecretkey" -d '{"text": "I love this project!"}
 
+Important Notes
 
-Notes
-Backend runs on http://localhost:8001
-API requires header: x-api-key: supersecretkey
-CORS must be enabled in FastAPI
-Angular uses production build served via Nginx
+Port 443 is occupied by Apache on the VPS
+Docker containers do not expose HTTPS directly in this setup
+All services communicate via HTTP internally
+HTTPS termination happens at the VPS level (Apache)
 
+Design Decision
+
+This architecture separates concerns:
+
+Apache handles HTTPS termination (edge gateway)
+Angular container serves static frontend via nginx
+FastAPI handles backend inference
+
+This avoids:
+
+Port conflicts
+Double SSL termination
+Unnecessary complexity inside containers
+
+Future Improvements
+
+Move to a unified reverse proxy (nginx instead of Apache)
+Introduce centralized API gateway
+Optional HTTPS inside internal network (mTLS)
+
+Summary
+
+This setup prioritizes simplicity, clear separation of services, and stable VPS deployment architecture.
 
 Architecture
 Angular (4200)
